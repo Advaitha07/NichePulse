@@ -104,13 +104,21 @@ describe('Phase 3: Claude Intelligence Synthesis Service Tests', () => {
   test('2. Missing ANTHROPIC_API_KEY handling', async () => {
     delete process.env.ANTHROPIC_API_KEY;
 
-    const res = await analyzeNicheData('sustainable fashion', [
+    const resFallback = await analyzeNicheData('sustainable fashion', [
       { id: 'fix_1', title: 'Test', url: 'https://example.com' }
-    ]);
+    ], { allowFallback: true });
 
-    assert.strictEqual(res.success, false);
-    assert.strictEqual(res.status, 'missing_api_key');
-    assert.strictEqual(res.report, null);
+    assert.strictEqual(resFallback.success, true);
+    assert.strictEqual(resFallback.status, 'fallback');
+    assert.ok(resFallback.report);
+
+    const resNoFallback = await analyzeNicheData('sustainable fashion', [
+      { id: 'fix_1', title: 'Test', url: 'https://example.com' }
+    ], { allowFallback: false });
+
+    assert.strictEqual(resNoFallback.success, false);
+    assert.strictEqual(resNoFallback.status, 'missing_api_key');
+    assert.strictEqual(resNoFallback.report, null);
   });
 
   test('3. Malformed / non-JSON Claude response handling', async () => {

@@ -110,7 +110,7 @@ export async function runAgent(goal, options = {}) {
         logTrace(state, 'recovery', 'started', { attempt: currentRecoveryAttempts, tool: task.tool });
 
         // Retry task with fallback enabled explicitly
-        const retryContext = { ...execContext, allowFallback: true };
+        const retryContext = { ...execContext, allowFallback: true, allowClaudeFallback: true };
         const retryRecord = await executeTask(task, retryContext);
 
         if (retryRecord.success) {

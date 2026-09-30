@@ -102,6 +102,7 @@ export async function executeTask(task, context = {}) {
 
         const analysisRes = await analyzeNicheData(niche, evidence, {
           isFixtureEvidence,
+          allowFallback: context.allowClaudeFallback ?? false,
           clientOverride: context.clientOverride
         });
 

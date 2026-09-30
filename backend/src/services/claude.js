@@ -120,6 +120,59 @@ Respond ONLY with a JSON object matching this schema:
 }
 
 /**
+ * Generates a deterministic, grounded report shape from evidence items when running in demo fixture mode.
+ */
+function generateFixtureReport(niche, evidenceInput = []) {
+  const topItem = evidenceInput[0] || {};
+  const evidenceIds = evidenceInput.map(e => e.id).filter(Boolean);
+
+  return {
+    topTopics: [
+      {
+        topic: `${niche || 'Niche'} Insights & Feedback`,
+        summary: topItem.title || `Market discussion analysis for ${niche}`,
+        evidenceIds: evidenceIds.slice(0, 2)
+      }
+    ],
+    emergingTrends: [
+      {
+        trend: 'Transparent & Direct Value Delivery',
+        description: topItem.text || `Consumer preference shifting towards verified quality and transparent pricing in ${niche}.`,
+        signalStrength: 'high',
+        evidenceIds: evidenceIds.slice(0, 2)
+      }
+    ],
+    recurringProblems: [
+      {
+        problem: 'Sizing & Expectation Mismatches',
+        impact: 'High return rates and customer conversion drop-offs.',
+        evidenceIds: evidenceIds.slice(0, 1)
+      }
+    ],
+    aiInsights: [
+      {
+        insight: 'Consumer trust and clear specifications are primary conversion drivers.',
+        grounding: `Reflected across discussions in ${niche} community threads.`,
+        evidenceIds: evidenceIds.slice(0, 2)
+      }
+    ],
+    opportunities: [
+      {
+        opportunity: 'Automated Fit & Quality Verification Tools',
+        rationale: 'Addresses primary dissatisfaction and return friction point.',
+        evidenceIds: evidenceIds.slice(0, 2)
+      }
+    ],
+    sourceLinks: evidenceInput.filter(e => e.url).map(e => ({
+      title: e.title || e.id,
+      url: e.url,
+      source: e.source || 'fixture',
+      evidenceId: e.id
+    }))
+  };
+}
+
+/**
  * Validates and normalizes raw JSON response from Claude into the standard NichePulse report shape.
  */
 export function normalizeReportOutput(rawReport, evidenceInput, metadataExtras = {}) {
@@ -187,6 +240,19 @@ export async function analyzeNicheData(niche, evidence = [], options = {}) {
   const evidenceInput = prepareEvidenceInput(evidence);
 
   if (!apiKey && !options.clientOverride) {
+    if (options.allowFallback === true) {
+      const fallbackReport = generateFixtureReport(niche, evidenceInput);
+      return {
+        success: true,
+        status: 'fallback',
+        message: 'ANTHROPIC_API_KEY not configured; using deterministic demo fixture synthesis',
+        report: normalizeReportOutput(fallbackReport, evidenceInput, {
+          status: 'fallback',
+          isFixtureEvidence: true,
+          metadata: { note: 'Generated via demo fixture synthesis mode' }
+        })
+      };
+    }
     return {
       success: false,
       status: 'missing_api_key',
