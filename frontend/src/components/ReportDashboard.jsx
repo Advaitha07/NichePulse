@@ -168,7 +168,9 @@ export default function ReportDashboard() {
               <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400">Source Health</div>
               <div className="text-xs font-bold text-emerald-400 mt-1 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Reddit ({sources.reddit?.status || 'ok'}) • YouTube ({sources.youtube?.status || 'ok'})</span>
+                <span>
+                  Reddit ({sources.reddit?.status === 'fallback' || sources.reddit?.status === 'missing_credentials' ? 'unavailable — credentials not configured' : (sources.reddit?.status || 'ok')}) • YouTube ({sources.youtube?.status || 'ok'})
+                </span>
               </div>
             </div>
 
@@ -320,7 +322,9 @@ export default function ReportDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {evidence.map((item, idx) => (
+                {evidence
+                  .filter(item => !(item.source === 'reddit' && item.sourceType === 'fixture'))
+                  .map((item, idx) => (
                   <div key={item.id || idx} className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800/80 space-y-2 hover:border-indigo-500/30 transition-colors">
                     <div className="flex items-center justify-between">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
