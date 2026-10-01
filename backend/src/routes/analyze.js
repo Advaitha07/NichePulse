@@ -85,7 +85,10 @@ router.post('/', async (req, res) => {
     // Execute Claude intelligence synthesis if requested / key available (Phase 3)
     let claudeAnalysis = null;
     if (!skipClaude) {
-      claudeAnalysis = await analyzeNicheData(cleanNiche, evidence, { isFixtureEvidence });
+      claudeAnalysis = await analyzeNicheData(cleanNiche, evidence, {
+        isFixtureEvidence,
+        allowFallback
+      });
     }
 
     return res.json({
